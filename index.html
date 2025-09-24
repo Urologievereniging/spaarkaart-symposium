@@ -12,17 +12,32 @@
     padding: 20px;
     text-align: center;
   }
-  h1 { color: #333; margin-bottom: 5px; }
-  p { color: #555; margin-bottom: 20px; }
+
+  h1 { 
+    color: #333; 
+    margin-bottom: 5px; 
+  }
+
+  p { 
+    color: #555; 
+    margin-bottom: 20px; 
+  }
+
+  /* Grid met altijd 4 kolommen */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(4, 1fr); /* altijd 4 naast elkaar */
+    gap: 10px;
     justify-items: center;
+    max-width: 520px; /* zorgt dat het mooi past op mobiel */
+    margin: 0 auto;
   }
+
+  /* Vakje styling */
   .stand {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    max-width: 120px;
+    aspect-ratio: 1/1; /* altijd vierkant */
     background: #fff;
     border: 2px solid #ccc;
     border-radius: 10px;
@@ -33,8 +48,16 @@
     position: relative;
     transition: 0.3s;
     cursor: pointer;
+    box-sizing: border-box;
   }
-  .stand.scanned { background: #4CAF50; color: white; }
+
+  /* Als stand gescand is */
+  .stand.scanned { 
+    background: #4CAF50; 
+    color: white; 
+  }
+
+  /* Stempel rechts onder */
   .stempel {
     position: absolute;
     bottom: 5px;
@@ -42,8 +65,33 @@
     font-size: 22px;
     display: none;
   }
-  .stand.scanned .stempel { display: block; }
-  .message { margin-top: 20px; font-size: 18px; color: #555; }
+
+  .stand.scanned .stempel { 
+    display: block; 
+  }
+
+  /* Teller onderaan */
+  .message { 
+    margin-top: 20px; 
+    font-size: 18px; 
+    color: #555; 
+  }
+
+  /* Reset knop */
+  .reset-button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .reset-button:hover {
+    background: #d32f2f;
+  }
 </style>
 </head>
 <body>
@@ -51,8 +99,8 @@
 <h1>Digitale Spaarkaart Symposium</h1>
 <p>Scan de QR-codes bij de stands om je kaart automatisch te vullen!</p>
 
+<!-- De 24 vakjes -->
 <div class="grid" id="grid">
-  <!-- 24 vakjes -->
   <script>
     for(let i=1; i<=24; i++){
       document.write(`<div class="stand" id="stand${i}">Stand ${i} <span class="stempel">✔</span></div>`);
@@ -60,7 +108,11 @@
   </script>
 </div>
 
+<!-- Teller -->
 <div class="message" id="message">Scans: 0 / 24</div>
+
+<!-- Reset knop -->
+<button class="reset-button" onclick="resetCard()">Reset kaart</button>
 
 <script>
   const scannedKey = "spaarkaartScans";
@@ -68,43 +120,55 @@
   // Haal bestaande scans uit localStorage
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
+  // Update de weergave
   function updateScansDisplay() {
     scanned.forEach(num => {
       const stand = document.getElementById(`stand${num}`);
-      if(stand) stand.classList.add('scanned');
+      if (stand) stand.classList.add('scanned');
     });
     document.getElementById('message').innerText = `Scans: ${scanned.length} / 24`;
   }
 
+  // Functie om een stand te scannen
   function scanStand(num) {
     num = parseInt(num);
-    if(!scanned.includes(num)){
+    if (!scanned.includes(num)) {
       scanned.push(num);
       localStorage.setItem(scannedKey, JSON.stringify(scanned));
       updateScansDisplay();
 
-      if(scanned.length === 5){
+      if (scanned.length === 5) {
         alert('Goed gedaan! 5 stands bezocht. Kleine prijs!');
-      } else if(scanned.length === 24){
+      } else if (scanned.length === 24) {
         alert('Geweldig! Alle 24 stands bezocht. Grote prijs!');
       }
     }
   }
 
-  // Check URL voor ?stand=x
+  // Reset functie
+  function resetCard() {
+    if (confirm("Weet je zeker dat je je spaarkaart wilt resetten?")) {
+      scanned = [];
+      localStorage.removeItem(scannedKey);
+      document.querySelectorAll('.stand').forEach(stand => stand.classList.remove('scanned'));
+      updateScansDisplay();
+    }
+  }
+
+  // Check URL parameter ?stand=x
   const urlParams = new URLSearchParams(window.location.search);
   const standParam = urlParams.get('stand');
-  if(standParam) scanStand(standParam);
+  if (standParam) scanStand(standParam);
 
-  // Klik-event voor demo
-  document.querySelectorAll('.stand').forEach(stand=>{
-    stand.addEventListener('click', ()=>{
+  // Klikken op vakje (handmatig scannen, voor demo of test)
+  document.querySelectorAll('.stand').forEach(stand => {
+    stand.addEventListener('click', () => {
       const num = stand.id.replace('stand','');
       scanStand(num);
     });
   });
 
-  // Init display
+  // Initialisatie bij het laden
   updateScansDisplay();
 </script>
 
