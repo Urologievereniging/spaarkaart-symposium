@@ -12,14 +12,8 @@
     padding: 20px;
     text-align: center;
   }
-  h1 {
-    color: #333;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #555;
-    margin-bottom: 20px;
-  }
+  h1 { color: #333; margin-bottom: 5px; }
+  p { color: #555; margin-bottom: 20px; }
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -38,11 +32,9 @@
     font-weight: bold;
     position: relative;
     transition: 0.3s;
+    cursor: pointer;
   }
-  .stand.scanned {
-    background: #4CAF50;
-    color: white;
-  }
+  .stand.scanned { background: #4CAF50; color: white; }
   .stempel {
     position: absolute;
     bottom: 5px;
@@ -50,14 +42,8 @@
     font-size: 22px;
     display: none;
   }
-  .stand.scanned .stempel {
-    display: block;
-  }
-  .message {
-    margin-top: 20px;
-    font-size: 18px;
-    color: #555;
-  }
+  .stand.scanned .stempel { display: block; }
+  .message { margin-top: 20px; font-size: 18px; color: #555; }
 </style>
 </head>
 <body>
@@ -77,36 +63,49 @@
 <div class="message" id="message">Scans: 0 / 24</div>
 
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const standParam = urlParams.get('stand'); // bijv. "1"
-  
-  let scannedCount = 0;
+  const scannedKey = "spaarkaartScans";
 
-  function scanStand(standNumber){
-    const stand = document.getElementById(`stand${standNumber}`);
-    if(stand && !stand.classList.contains('scanned')){
-      stand.classList.add('scanned');
-      scannedCount++;
-      document.getElementById('message').innerText = `Scans: ${scannedCount} / 24`;
+  // Haal bestaande scans uit localStorage
+  let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-      if(scannedCount === 5){
+  function updateScansDisplay() {
+    scanned.forEach(num => {
+      const stand = document.getElementById(`stand${num}`);
+      if(stand) stand.classList.add('scanned');
+    });
+    document.getElementById('message').innerText = `Scans: ${scanned.length} / 24`;
+  }
+
+  function scanStand(num) {
+    num = parseInt(num);
+    if(!scanned.includes(num)){
+      scanned.push(num);
+      localStorage.setItem(scannedKey, JSON.stringify(scanned));
+      updateScansDisplay();
+
+      if(scanned.length === 5){
         alert('Goed gedaan! 5 stands bezocht. Kleine prijs!');
-      } else if(scannedCount === 24){
+      } else if(scanned.length === 24){
         alert('Geweldig! Alle 24 stands bezocht. Grote prijs!');
       }
     }
   }
 
-  if(standParam){
-    scanStand(standParam);
-  }
+  // Check URL voor ?stand=x
+  const urlParams = new URLSearchParams(window.location.search);
+  const standParam = urlParams.get('stand');
+  if(standParam) scanStand(standParam);
 
+  // Klik-event voor demo
   document.querySelectorAll('.stand').forEach(stand=>{
     stand.addEventListener('click', ()=>{
       const num = stand.id.replace('stand','');
       scanStand(num);
     });
   });
+
+  // Init display
+  updateScansDisplay();
 </script>
 
 </body>
