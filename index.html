@@ -3,11 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Digitale Spaarkaart Urologie Symposium</title>
+<title>Urologie Symposium Spaarkaart</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; text-align: center; }
-  h1 { color: #333; margin-bottom: 5px; }
-  p { color: #555; margin-bottom: 20px; }
+  body { 
+    font-family: Arial, sans-serif; 
+    background-color: #afb81a; /* pagina achtergrond */ 
+    margin: 0; 
+    padding: 20px; 
+    text-align: center; 
+    color: white; 
+  }
+  h1 { color: white; margin-bottom: 5px; }
+  p { color: white; margin-bottom: 20px; }
   .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -17,41 +24,57 @@
     justify-items: center;
   }
   .stand {
+    position: relative;
     width: 100%;
     max-width: 120px;
-    aspect-ratio: 1/1;
-    background: #fff;
+    padding-top: 68.75%; /* behoud logo ratio 256x176 → 16:11 */
     border: 2px solid #ccc;
-    border-radius: 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: white; /* vakjes achtergrond wit */
+  }
+  .stand img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: auto;
+    object-fit: contain;
+  }
+  .overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(175, 184, 26, 0.4); /* lichte transparante groene overlay */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-weight: bold;
-    position: relative;
-    box-sizing: border-box;
+    font-size: 2em;
+    color: white;
+    display: none;
   }
-  .stand.scanned { background: #4CAF50; color: white; }
-  .stempel { position: absolute; bottom: 5px; right: 5px; font-size: 22px; display: none; }
-  .stand.scanned .stempel { display: block; }
-  .message { margin-top: 20px; font-size: 18px; color: #555; }
+  .stand.scanned .overlay {
+    display: flex;
+  }
   .reset-button {
     margin-top: 15px;
     padding: 10px 20px;
-    background: #f44336;
+    background: #6b721b; /* nieuwe knopkleur */
     color: white;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
   }
-  .reset-button:hover { background: #d32f2f; }
-  img { max-width: 100%; max-height: 100%; border-radius: 6px; }
+  .reset-button:hover { background: #556116; }
 </style>
 </head>
 <body>
 
-<h1>Digitale Spaarkaart Symposium</h1>
-<p>Scan de QR-codes van de sponsoren om je kaart automatisch te vullen!</p>
+<h1>Urologie Symposium Spaarkaart</h1>
+<p>Scan de QR-codes van de sponsoren om je kaart te vullen!</p>
 
 <div class="grid" id="grid"></div>
 <div class="message" id="message">Scans: 0 / 24</div>
@@ -63,46 +86,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-  // Array met 24 sponsoren en logo's
+  // Voorbeeld eerste twee sponsoren, vul aan met overige 24 later
   const sponsors = [
-    {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2025/abena.png"},
-    {name: "Medireva", logo: "https://urologiescholing.nl/wp-content/uploads/2025/medireva.png"},
-    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2025/coloplast.png"},
-    {name: "GoodLife Pharma", logo: "https://urologiescholing.nl/wp-content/uploads/2025/goodlife.png"},
-    {name: "Hollister", logo: "https://urologiescholing.nl/wp-content/uploads/2025/hollister.png"},
-    {name: "Hoogland Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2025/hoogland.png"},
-    {name: "Laborie", logo: "https://urologiescholing.nl/wp-content/uploads/2025/laborie.png"},
-    {name: "Manfred Sauer", logo: "https://urologiescholing.nl/wp-content/uploads/2025/manfredsauer.png"},
-    {name: "Pelvitec", logo: "https://urologiescholing.nl/wp-content/uploads/2025/pelvitec.png"},
-    {name: "Qufora", logo: "https://urologiescholing.nl/wp-content/uploads/2025/qufora.png"},
-    {name: "Teleflex Urology", logo: "https://urologiescholing.nl/wp-content/uploads/2025/teleflex.png"},
-    {name: "Van Heek", logo: "https://urologiescholing.nl/wp-content/uploads/2025/vanheek.png"},
-    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2025/wellspect.png"},
-    {name: "Accord Healthcare", logo: "https://urologiescholing.nl/wp-content/uploads/2025/accord.png"},
-    {name: "Androlabs", logo: "https://urologiescholing.nl/wp-content/uploads/2025/androlabs.png"},
-    {name: "Ipsen", logo: "https://urologiescholing.nl/wp-content/uploads/2025/ipsen.png"},
-    {name: "Medtronic", logo: "https://urologiescholing.nl/wp-content/uploads/2025/medtronic.png"},
-    {name: "Recordati", logo: "https://urologiescholing.nl/wp-content/uploads/2025/recordati.png"},
-    {name: "Memidis", logo: "https://urologiescholing.nl/wp-content/uploads/2025/memidis.png"},
-    {name: "Astellas", logo: "https://urologiescholing.nl/wp-content/uploads/2025/astellas.png"},
-    {name: "Janssen", logo: "https://urologiescholing.nl/wp-content/uploads/2025/janssen.png"},
-    {name: "ExtraSponsor1", logo: "https://urologiescholing.nl/wp-content/uploads/2025/sponsor21.png"},
-    {name: "ExtraSponsor2", logo: "https://urologiescholing.nl/wp-content/uploads/2025/sponsor22.png"},
-    {name: "ExtraSponsor3", logo: "https://urologiescholing.nl/wp-content/uploads/2025/sponsor23.png"}
+    {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
+    {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"}
   ];
 
-  // Maak vakjes met logo's
   sponsors.forEach((sponsor, index) => {
     const div = document.createElement('div');
     div.className = 'stand';
     div.id = 'stand' + index;
-    div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><span class="stempel">✔</span>`;
+    div.innerHTML = `
+      <img src="${sponsor.logo}" alt="${sponsor.name}">
+      <div class="overlay">✔</div>
+    `;
     grid.appendChild(div);
   });
 
   function updateScansDisplay(){
-    scanned.forEach(index=>{
-      const stand = document.getElementById('stand'+index);
+    scanned.forEach(index => {
+      const stand = document.getElementById('stand' + index);
       if(stand) stand.classList.add('scanned');
     });
     document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
