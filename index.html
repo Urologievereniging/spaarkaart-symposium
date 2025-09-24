@@ -7,7 +7,7 @@
 <style>
   body { 
     font-family: Arial, sans-serif; 
-    background-color: #afb81a; 
+    background-color: #afb81a; /* pagina achtergrond */ 
     margin: 0; 
     padding: 20px; 
     text-align: center; 
@@ -27,12 +27,12 @@
     position: relative;
     width: 100%;
     max-width: 120px;
-    padding-top: 68.75%;
+    padding-top: 68.75%; /* behoud logo ratio 256x176 → 16:11 */
     border: 2px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
     overflow: hidden;
-    background-color: white;
+    background-color: white; /* vakjes achtergrond wit */
   }
   .stand img {
     position: absolute;
@@ -47,7 +47,7 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(175, 184, 26, 0.4);
+    background: rgba(175, 184, 26, 0.4); /* lichte transparante groene overlay */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,7 +61,7 @@
   .reset-button {
     margin-top: 15px;
     padding: 10px 20px;
-    background: #6b721b;
+    background: #6b721b; /* nieuwe knopkleur */
     color: white;
     border: none;
     border-radius: 8px;
@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
+  // Voorbeeld eerste twee sponsoren, vul aan met overige 24 later
   const sponsors = [
     {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
     {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
@@ -111,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
+
+    
   ];
 
   sponsors.forEach((sponsor, index) => {
@@ -149,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Lees hash uit de URL (#SponsorNaam)
-  const sponsorHash = window.location.hash.substring(1);
-  if(sponsorHash){
-    const index = sponsors.findIndex(s => s.name === sponsorHash);
+  // Lees parameter sponsor=NaamSponsor
+  const urlParams = new URLSearchParams(window.location.search);
+  const sponsorParam = urlParams.get('sponsor');
+  if(sponsorParam){
+    const index = sponsors.findIndex(s => s.name === sponsorParam);
     if(index !== -1) scanStand(index);
-    history.replaceState(null, '', 'spaarkaart.html'); // verwijdert de hash na scan
   }
 
   updateScansDisplay();
@@ -163,3 +166,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
+
