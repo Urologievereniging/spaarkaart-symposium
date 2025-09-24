@@ -1,53 +1,55 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Digitale Spaarkaart Symposium</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; text-align: center; }
-  h1 { color: #333; margin-bottom: 5px; }
-  p { color: #555; margin-bottom: 20px; }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    max-width: 520px;
-    margin: 0 auto;
-    justify-items: center;
-  }
-  .stand {
-    width: 100%;
-    max-width: 120px;
-    aspect-ratio: 1/1;
-    background: #fff;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    position: relative;
-    box-sizing: border-box;
-  }
-  .stand.scanned { background: #4CAF50; color: white; }
-  .stempel { position: absolute; bottom: 5px; right: 5px; font-size: 22px; display: none; }
-  .stand.scanned .stempel { display: block; }
-  .message { margin-top: 20px; font-size: 18px; color: #555; }
-  .reset-button, .scan-button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  .reset-button { background: #f44336; }
-  .reset-button:hover { background: #d32f2f; }
-  .scan-button { background: #2196F3; margin-left: 10px; }
-  .scan-button:hover { background: #1976D2; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digitale Spaarkaart Symposium</title>
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; text-align: center; }
+    h1 { color: #333; margin-bottom: 5px; }
+    p { color: #555; margin-bottom: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      max-width: 520px;
+      margin: 0 auto;
+      justify-items: center;
+    }
+    .stand {
+      width: 100%;
+      max-width: 120px;
+      aspect-ratio: 1/1;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .stand.scanned { background: #4CAF50; color: white; }
+    .stempel { position: absolute; bottom: 5px; right: 5px; font-size: 22px; display: none; }
+    .stand.scanned .stempel { display: block; }
+    .message { margin-top: 20px; font-size: 18px; color: #555; }
+    .reset-button, .scan-button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .reset-button { background: #f44336; }
+    .reset-button:hover { background: #d32f2f; }
+    .scan-button { background: #2196F3; margin-left: 10px; }
+    .scan-button:hover { background: #1976D2; }
+    #reader { width: 100%; max-width: 300px; margin: 20px auto; }
+  </style>
 </head>
 <body>
 
@@ -58,7 +60,9 @@
 
 <div class="message" id="message">Scans: 0 / 24</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
-<button class="scan-button" onclick="scanNewCode()">Scan nog een code</button>
+<button class="scan-button" onclick="startScanner()">Scan QR-code</button>
+
+<div id="reader"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -106,22 +110,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Functie voor "Scan nog een code"
-  window.scanNewCode = function(){
-    const num = prompt("Voer het standnummer in dat je wilt scannen (1-24):");
-    const standNum = parseInt(num);
-    if(standNum >= 1 && standNum <= 24){
-      scanStand(standNum);
-      alert(`Stand ${standNum} gescand!`);
-    } else {
-      alert("Ongeldig nummer. Voer een getal tussen 1 en 24 in.");
-    }
+  // QR-code scanner starten
+  window.startScanner = function(){
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" }, // Achtercamera
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 250 }
+      },
+      (decodedText) => {
+        const num = decodedText.split('=')[1];
+        if(num && !scanned.includes(num)){
+          scanStand(num);
+          html5QrCode.stop();
+          alert(`Stand ${num} gescand!`);
+        }
+      },
+      (errorMessage) => {
+        // Foutafhandelingslogica
+      }
+    ).catch(err => {
+      console.error("QR-code scanner fout:", err);
+    });
   }
-
-  // Lees QR-code parameter ?stand=x
-  const urlParams = new URLSearchParams(window.location.search);
-  const standParam = urlParams.get('stand');
-  if(standParam) scanStand(standParam);
 
   // Init display
   updateScansDisplay();
