@@ -1,283 +1,140 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Urologie Symposium Spaarkaart</title>
-
-<!-- html5-qrcode -->
-<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"></script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitale Spaarkaart Urologie Symposium</title>
 <style>
-  :root { --page-bg: #afb81a; --box-bg: #fff; --accent: rgba(175,184,26,0.4); --box-border: #ccc; --btn: #6b721b; }
-  body{
-    font-family: Arial, sans-serif;
-    background-color: var(--page-bg);
-    margin:0; padding:20px; text-align:center; color:#fff;
+  body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; text-align: center; }
+  h1 { color: #333; margin-bottom: 5px; }
+  p { color: #555; margin-bottom: 20px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 520px;
+    margin: 0 auto;
+    justify-items: center;
   }
-  h1{ margin:0 0 6px; font-size:20px; }
-  p{ margin:0 0 14px; color:#fff; }
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    max-width:520px;
-    margin:0 auto 12px;
-    justify-items:center;
+  .stand {
+    width: 100%;
+    max-width: 120px;
+    aspect-ratio: 1/1;
+    background: #fff;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    position: relative;
+    box-sizing: border-box;
   }
-  .stand{
-    position:relative;
-    width:100%;
-    max-width:120px;
-    padding-top:68.75%; /* behoud 256x176 verhouding */
-    border:2px solid var(--box-border);
-    border-radius:8px;
-    overflow:hidden;
-    background:var(--box-bg);
+  .stand.scanned { background: #4CAF50; color: white; }
+  .stempel { position: absolute; bottom: 5px; right: 5px; font-size: 22px; display: none; }
+  .stand.scanned .stempel { display: block; }
+  .message { margin-top: 20px; font-size: 18px; color: #555; }
+  .reset-button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
   }
-  .stand img{
-    position:absolute; top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    width:90%; height:auto; object-fit:contain;
-  }
-  .overlay{
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    display:flex; justify-content:center; align-items:center;
-    font-size:2em; color:#fff; background:var(--accent); display:none;
-  }
-  .stand.scanned .overlay{ display:flex; }
-  .controls { margin-top:12px; }
-  .btn {
-    display:inline-block; padding:12px 22px; border-radius:8px; color:#fff; background:var(--btn);
-    border:none; font-size:15px; cursor:pointer; margin:0 6px;
-  }
-  .btn.secondary { background:#556116; }
-  .message { margin-top:10px; color:#fff; font-size:15px; }
-
-  /* scanner overlay (fullscreen) */
-  .scanner-modal {
-    position:fixed; inset:0; display:none; justify-content:center; align-items:center;
-    background: rgba(0,0,0,0.6); z-index:9999; padding:20px;
-  }
-  .scanner-panel {
-    width:100%; max-width:480px; background:#fff; color:#000; border-radius:12px; padding:12px; box-sizing:border-box;
-    display:flex; flex-direction:column; gap:10px; align-items:center;
-  }
-  #reader { width:100%; height:320px; max-height:60vh; }
-  .scanner-row { width:100%; display:flex; justify-content:space-between; gap:10px; }
-  .hint { font-size:14px; color:#333; text-align:left; width:100%; }
-  .small { font-size:13px; color:#222; }
-
-  /* responsive tweak */
-  @media (max-width:420px){
-    .grid { max-width:360px; gap:8px; }
-  }
+  .reset-button:hover { background: #d32f2f; }
+  img { max-width: 100%; max-height: 100%; border-radius: 6px; }
 </style>
 </head>
 <body>
 
-<h1>Urologie Symposium Spaarkaart</h1>
-<p>Scan de QR-codes van de sponsoren om je kaart te vullen!</p>
+<h1>Digitale Spaarkaart Symposium</h1>
+<p>Scan de QR-codes van de sponsoren om je kaart automatisch te vullen!</p>
 
 <div class="grid" id="grid"></div>
-
 <div class="message" id="message">Scans: 0 / 24</div>
-
-<div class="controls">
-  <button class="btn" id="openScannerBtn">Scan volgende sponsor</button>
-  <button class="btn secondary" id="resetBtn">Reset kaart</button>
-</div>
-
-<!-- Fullscreen scanner modal -->
-<div class="scanner-modal" id="scannerModal" aria-hidden="true">
-  <div class="scanner-panel" role="dialog" aria-modal="true">
-    <div class="hint"><strong>Scanner actief</strong><br> Richt de camera op de QR-code bij de sponsor. Scanner blijft actief totdat je op 'Stop scanner' tikt.</div>
-    <div id="reader"></div>
-    <div class="scanner-row">
-      <button class="btn" id="stopScannerBtn">Stop scanner</button>
-      <button class="btn secondary" id="helpBtn">Camera niet werkend?</button>
-    </div>
-    <div class="small">Tip: geef de browser toestemming voor camera en blijf op deze pagina terwijl je scant.</div>
-  </div>
-</div>
+<button class="reset-button" onclick="resetCard()">Reset kaart</button>
 
 <script>
-document.addEventListener('DOMContentLoaded', ()=>{
-
-  const sponsors = [
-    {name:"Abena", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
-    {name:"Alnylam", logo:"https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
-    {name:"BD", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
-    {name:"Bosman MediReva", logo:"https://urologiescholing.nl/wp-content/uploads/2025/03/Logo_sponsor_Bosman_MediReva.webp"},
-    {name:"Coloplast", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
-    {name:"Dudok Surgical", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Dudok.webp"},
-    {name:"Goodlife", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Goodlife.webp"},
-    {name:"Hollister", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hollister.webp"},
-    {name:"Hoogland Medical", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hoogland.webp"},
-    {name:"Laborie", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Laborie.webp"},
-    {name:"Manfred Sauer", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Manfredsauer.webp"},
-    {name:"Mediq", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Mediq.webp"},
-    {name:"Medtronic", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Medtronic.webp"},
-    {name:"Memidis Pharma", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_MemidisPharma.webp"},
-    {name:"PCU", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_PCU.webp"},
-    {name:"Pelvitec", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Pelvitec.webp"},
-    {name:"Qufora", logo:"https://urologiescholing.nl/wp-content/uploads/2025/04/Logo_sponsor_Qufora.webp"},
-    {name:"Rembrandt", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Rembrandt.webp"},
-    {name:"RMS", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_RMS.webp"},
-    {name:"Teleflex", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Teleflex_Healt.webp"},
-    {name:"Tena", logo:"https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
-    {name:"Urotex", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
-    {name:"Van Heek Medical", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
-    {name:"Wellspect", logo:"https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
-  ];
-
+document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('grid');
-  const message = document.getElementById('message');
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-  // create grid items
-  sponsors.forEach((s, i)=>{
+  // Array met 24 sponsoren en logo's
+  const sponsors = [
+    {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2025/abena.png"},
+    {name: "Medireva", logo: "https://urologiescholing.nl/wp-content/uploads/2025/medireva.png"},
+    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2025/coloplast.png"},
+    {name: "GoodLife Pharma", logo: "https://urologiescholing.nl/wp-content/uploads/2025/goodlife.png"},
+    {name: "Hollister", logo: "https://urologiescholing.nl/wp-content/uploads/2025/hollister.png"},
+    {name: "Hoogland Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2025/hoogland.png"},
+    {name: "Laborie", logo: "https://urologiescholing.nl/wp-content/uploads/2025/laborie.png"},
+    {name: "Manfred Sauer", logo: "https://urologiescholing.nl/wp-content/uploads/2025/manfredsauer.png"},
+    {name: "Pelvitec", logo: "https://urologiescholing.nl/wp-content/uploads/2025/pelvitec.png"},
+    {name: "Qufora", logo: "https://urologiescholing.nl/wp-content/uploads/2025/qufora.png"},
+    {name: "Teleflex Urology", logo: "https://urologiescholing.nl/wp-content/uploads/2025/teleflex.png"},
+    {name: "Van Heek", logo: "https://urologiescholing.nl/wp-content/uploads/2025/vanheek.png"},
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2025/wellspect.png"},
+    {name: "Accord Healthcare", logo: "https://urologiescholing.nl/wp-content/uploads/2025/accord.png"},
+    {name: "Androlabs", logo: "https://urologiescholing.nl/wp-content/uploads/2025/androlabs.png"},
+    {name: "Ipsen", logo: "https://urologiescholing.nl/wp-content/uploads/2025/ipsen.png"},
+    {name: "Medtronic", logo: "https://urologiescholing.nl/wp-content/uploads/2025/medtronic.png"},
+    {name: "Recordati", logo: "https://urologiescholing.nl/wp-content/uploads/2025/recordati.png"},
+    {name: "Memidis", logo: "https://urologiescholing.nl/wp-content/uploads/2025/memidis.png"},
+    {name: "Astellas", logo: "https://urologiescholing.nl/wp-content/uploads/2025/astellas.png"},
+    {name: "Janssen", logo: "https://urologiescholing.nl/wp-content/uploads/2025/janssen.png"},
+    {name: "ExtraSponsor1", logo: "https://urologiescholing.nl/wp-content/uploads/2025/sponsor21.png"},
+    {name: "ExtraSponsor2", logo: "https://urologiescholing.nl/wp-content/uploads/2025/sponsor22.png"},
+    {name: "ExtraSponsor3", logo: "https://urologiescholing.nl/wp-content/uploads/2025/sponsor23.png"}
+  ];
+
+  // Maak vakjes met logo's
+  sponsors.forEach((sponsor, index) => {
     const div = document.createElement('div');
     div.className = 'stand';
-    div.id = 'stand' + i;
-    div.innerHTML = `<img src="${s.logo}" alt="${s.name}"><div class="overlay">✔</div>`;
+    div.id = 'stand' + index;
+    div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><span class="stempel">✔</span>`;
     grid.appendChild(div);
   });
 
   function updateScansDisplay(){
-    // remove existing scanned classes first (in case of reset)
-    sponsors.forEach((_,i)=> document.getElementById('stand'+i).classList.remove('scanned'));
-    scanned.forEach(i=>{
-      const el = document.getElementById('stand'+i);
-      if(el) el.classList.add('scanned');
+    scanned.forEach(index=>{
+      const stand = document.getElementById('stand'+index);
+      if(stand) stand.classList.add('scanned');
     });
-    message.textContent = `Scans: ${scanned.length} / ${sponsors.length}`;
-    localStorage.setItem(scannedKey, JSON.stringify(scanned));
+    document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
   }
 
-  function addScan(index){
+  function scanStand(index){
     if(!scanned.includes(index)){
       scanned.push(index);
+      localStorage.setItem(scannedKey, JSON.stringify(scanned));
       updateScansDisplay();
-      // small visual feedback
-      window.navigator.vibrate?.(100);
     }
   }
 
-  // normalize decoded text: extract meaningful parts from URLs too
-  function normalizeDecoded(decodedText){
-    let s = String(decodedText || '').trim();
-    try {
-      const u = new URL(s);
-      // take hostname + pathname (decoded) as searchable string
-      s = (u.hostname + ' ' + decodeURIComponent(u.pathname.replace(/\//g,' '))).trim();
-    } catch(e){
-      // not a URL: keep original text
-    }
-    return s.toLowerCase();
-  }
-
-  // find sponsor by matching name anywhere in decoded text (case-insensitive)
-  function findSponsorIndexByDecoded(decodedText){
-    const normalized = normalizeDecoded(decodedText);
-    return sponsors.findIndex(s => normalized.includes(s.name.toLowerCase()));
-  }
-
-  // reset button
-  document.getElementById('resetBtn').addEventListener('click', ()=>{
-    if(confirm('Weet je zeker dat je de spaarkaart wilt resetten?')){
+  window.resetCard = function(){
+    if(confirm("Weet je zeker dat je je spaarkaart wilt resetten?")){
       scanned = [];
+      localStorage.removeItem(scannedKey);
+      document.querySelectorAll('.stand').forEach(s=>s.classList.remove('scanned'));
       updateScansDisplay();
     }
-  });
+  }
 
-  // Scanner modal controls
-  const scannerModal = document.getElementById('scannerModal');
-  const openBtn = document.getElementById('openScannerBtn');
-  const stopBtn = document.getElementById('stopScannerBtn');
-  const helpBtn = document.getElementById('helpBtn');
-  let html5QrcodeScanner = null;
-  let scannerRunning = false;
-
-  openBtn.addEventListener('click', async ()=>{
-    // open modal
-    scannerModal.style.display = 'flex';
-    scannerModal.setAttribute('aria-hidden','false');
-
-    // start scanner if not running
-    if(!scannerRunning){
-      try {
-        html5QrcodeScanner = new Html5Qrcode("reader");
-        await html5QrcodeScanner.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: {width:250, height:250} },
-          (decodedText, decodedResult) => {
-            // on success
-            const idx = findSponsorIndexByDecoded(decodedText);
-            if(idx !== -1){
-              addScan(idx);
-              // small message overlay (temporary)
-              // keep scanner running to allow next scans
-              // optional: show short toast
-              console.log('Gescand:', sponsors[idx].name);
-            } else {
-              // optional: not found - you can show a small message
-              console.log('Geen match voor:', decodedText);
-            }
-          }
-        );
-        scannerRunning = true;
-      } catch(err){
-        console.error('Scanner kon niet starten:', err);
-        alert('Camera niet beschikbaar of toestemming geweigerd. Gebruik de camera-app als fallback.');
-        // close modal automatically on error
-        scannerModal.style.display = 'none';
-        scannerModal.setAttribute('aria-hidden','true');
-      }
-    }
-  });
-
-  stopBtn.addEventListener('click', async ()=>{
-    if(html5QrcodeScanner && scannerRunning){
-      try {
-        await html5QrcodeScanner.stop();
-      } catch(e){ console.warn(e); }
-      html5QrcodeScanner.clear();
-      html5QrcodeScanner = null;
-      scannerRunning = false;
-    }
-    scannerModal.style.display = 'none';
-    scannerModal.setAttribute('aria-hidden','true');
-  });
-
-  helpBtn.addEventListener('click', ()=>{
-    alert('Als de camera niet werkt: zorg dat je de browser toestemming geeft voor de camera, blijf op deze pagina en probeer opnieuw. Als dat niet lukt, open de standaard Camera-app en scan de QR-code (deze opent de pagina automatisch).');
-  });
-
-  // handle page-level sponsor param (when user scanned via external camera app which opened this page)
+  // Lees parameter sponsor=NaamSponsor
   const urlParams = new URLSearchParams(window.location.search);
   const sponsorParam = urlParams.get('sponsor');
   if(sponsorParam){
-    // find by param (match ignoring case)
-    const index = sponsors.findIndex(s => s.name.toLowerCase() === sponsorParam.toLowerCase());
-    if(index !== -1) addScan(index);
-    else {
-      // also try includes (in case param is URL or contains spaces)
-      const idx2 = findSponsorIndexByDecoded(sponsorParam);
-      if(idx2 !== -1) addScan(idx2);
-    }
-    // remove param from URL (so subsequent scans from camera-app won't re-add same param on reload)
-    if(history && history.replaceState){
-      const cleanUrl = location.origin + location.pathname;
-      history.replaceState(null, '', cleanUrl);
-    }
+    const index = sponsors.findIndex(s => s.name === sponsorParam);
+    if(index !== -1) scanStand(index);
   }
 
-  // init display from localStorage
   updateScansDisplay();
-
-}); // DOMContentLoaded
+});
 </script>
 
 </body>
