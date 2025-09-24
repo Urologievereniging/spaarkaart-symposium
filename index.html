@@ -159,14 +159,8 @@
   const urlParams = new URLSearchParams(window.location.search);
   const standParam = urlParams.get('stand');
   if (standParam) scanStand(standParam);
-
-  // Klikken op vakje (handmatig scannen, voor demo of test)
-  document.querySelectorAll('.stand').forEach(stand => {
-    stand.addEventListener('click', () => {
-      const num = stand.id.replace('stand','');
-      scanStand(num);
-    });
-  });
+    }
+  }
 
   // Initialisatie bij het laden
   updateScansDisplay();
@@ -174,3 +168,4 @@
 
 </body>
 </html>
+
