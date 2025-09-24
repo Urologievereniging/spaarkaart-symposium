@@ -5,129 +5,155 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Urologie Symposium Spaarkaart</title>
 <style>
-  body { font-family: Arial, sans-serif; background-color: #afb81a; margin:0; padding:20px; text-align:center; color:white; }
-  h1 { margin-bottom:5px; }
-  p { margin-bottom:20px; }
+  body { 
+    font-family: Arial, sans-serif; 
+    background-color: #afb81a; 
+    margin: 0; 
+    padding: 20px; 
+    text-align: center; 
+    color: white; 
+  }
+  h1 { color: white; margin-bottom: 5px; }
+  p { color: white; margin-bottom: 20px; }
   .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap:10px;
-    max-width:520px;
-    margin:0 auto;
-    justify-items:center;
+    gap: 10px;
+    max-width: 520px;
+    margin: 0 auto;
+    justify-items: center;
   }
   .stand {
     position: relative;
     width: 100%;
     max-width: 120px;
     padding-top: 68.75%; /* 256x176 verhouding */
-    border:2px solid #ccc;
-    border-radius:8px;
-    overflow:hidden;
-    background:white;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: white;
   }
   .stand img {
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:90%;
-    height:auto;
-    object-fit:contain;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: auto;
+    object-fit: contain;
   }
   .overlay {
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(175,184,26,0.4);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:2em;
-    color:white;
-    display:none;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(175, 184, 26, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: white;
+    display: none;
   }
-  .stand.scanned .overlay { display:flex; }
-  #reader { width:100%; max-width:400px; margin:20px auto; }
+  .stand.scanned .overlay {
+    display: flex;
+  }
+  .scan-button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    background: #6b721b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .scan-button:hover { background: #556116; }
 </style>
 </head>
 <body>
 
 <h1>Urologie Symposium Spaarkaart</h1>
-<p>Scan de QR-codes van de sponsoren!</p>
+<p>Scan de QR-codes van de sponsoren om je kaart te vullen!</p>
 
 <div class="grid" id="grid"></div>
-<div id="reader"></div>
 <div class="message" id="message">Scans: 0 / 24</div>
+<button class="scan-button" onclick="nextScan()">Scan volgende sponsor</button>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"></script>
 <script>
-// Sponsor lijst
-const sponsors = [
-  {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
-  {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
-  {name: "BD", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
-  {name: "Bosman MediReva", logo: "https://urologiescholing.nl/wp-content/uploads/2025/03/Logo_sponsor_Bosman_MediReva.webp"},
-  {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
-  {name: "Dudok Surgical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Dudok.webp"},
-  {name: "Goodlife", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Goodlife.webp"},
-  {name: "Hollister", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hollister.webp"},
-  {name: "Hoogland Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hoogland.webp"},
-  {name: "Laborie", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Laborie.webp"},
-  {name: "Manfred Sauer", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Manfredsauer.webp"},
-  {name: "Mediq", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Mediq.webp"},
-  {name: "Medtronic", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Medtronic.webp"},
-  {name: "Memidis Pharma", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_MemidisPharma.webp"},
-  {name: "PCU", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_PCU.webp"},
-  {name: "Pelvitec", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Pelvitec.webp"},
-  {name: "Qufora", logo: "https://urologiescholing.nl/wp-content/uploads/2025/04/Logo_sponsor_Qufora.webp"},
-  {name: "Rembrandt", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Rembrandt.webp"},
-  {name: "RMS", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_RMS.webp"},
-  {name: "Teleflex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Teleflex_Healt.webp"},
-  {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
-  {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
-  {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
-  {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
-];
+document.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('grid');
+  const scannedKey = "spaarkaartScans";
+  let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-let scanned = [];
+  const sponsors = [
+    {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
+    {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
+    {name: "BD", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
+    {name: "Bosman MediReva", logo: "https://urologiescholing.nl/wp-content/uploads/2025/03/Logo_sponsor_Bosman_MediReva.webp"},
+    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
+    {name: "Dudok Surgical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Dudok.webp"},
+    {name: "Goodlife", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Goodlife.webp"},
+    {name: "Hollister", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hollister.webp"},
+    {name: "Hoogland Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hoogland.webp"},
+    {name: "Laborie", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Laborie.webp"},
+    {name: "Manfred Sauer", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Manfredsauer.webp"},
+    {name: "Mediq", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Mediq.webp"},
+    {name: "Medtronic", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Medtronic.webp"},
+    {name: "Memidis Pharma", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_MemidisPharma.webp"},
+    {name: "PCU", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_PCU.webp"},
+    {name: "Pelvitec", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Pelvitec.webp"},
+    {name: "Qufora", logo: "https://urologiescholing.nl/wp-content/uploads/2025/04/Logo_sponsor_Qufora.webp"},
+    {name: "Rembrandt", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Rembrandt.webp"},
+    {name: "RMS", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_RMS.webp"},
+    {name: "Teleflex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Teleflex_Healt.webp"},
+    {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
+    {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
+    {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
+  ];
 
-// Maak de vakjes aan
-const grid = document.getElementById('grid');
-sponsors.forEach((sponsor, index) => {
-  const div = document.createElement('div');
-  div.className = 'stand';
-  div.id = 'stand'+index;
-  div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><div class="overlay">✔</div>`;
-  grid.appendChild(div);
-});
-
-// Update vakjes
-function updateScansDisplay() {
-  scanned.forEach(i=>{
-    document.getElementById('stand'+i).classList.add('scanned');
+  sponsors.forEach((sponsor, index) => {
+    const div = document.createElement('div');
+    div.className = 'stand';
+    div.id = 'stand' + index;
+    div.innerHTML = `
+      <img src="${sponsor.logo}" alt="${sponsor.name}">
+      <div class="overlay">✔</div>
+    `;
+    grid.appendChild(div);
   });
-  document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
-}
 
-// Nieuwe onScanSuccess functie
-function onScanSuccess(decodedText, decodedResult) {
-  const sponsorIndex = sponsors.findIndex(s => decodedText.toLowerCase().includes(s.name.toLowerCase()));
-  if(sponsorIndex !== -1 && !scanned.includes(sponsorIndex)) {
-    scanned.push(sponsorIndex);
-    updateScansDisplay();
+  function updateScansDisplay(){
+    scanned.forEach(index => {
+      const stand = document.getElementById('stand' + index);
+      if(stand) stand.classList.add('scanned');
+    });
+    document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
   }
-}
 
-// Start realtime QR-scanner
-const html5QrcodeScanner = new Html5Qrcode("reader");
-html5QrcodeScanner.start(
-  { facingMode: "environment" }, 
-  { fps: 10, qrbox: 250 },
-  onScanSuccess
-).catch(err => { console.log(err); });
+  function scanStand(index){
+    if(!scanned.includes(index)){
+      scanned.push(index);
+      localStorage.setItem(scannedKey, JSON.stringify(scanned));
+      updateScansDisplay();
+    }
+  }
 
-updateScansDisplay();
+  window.nextScan = function(){
+    alert("Open de camera-app en scan de QR-code van de volgende sponsor.");
+  }
+
+  // Lees parameter sponsor=NaamSponsor
+  const urlParams = new URLSearchParams(window.location.search);
+  const sponsorParam = urlParams.get('sponsor');
+  if(sponsorParam){
+    const index = sponsors.findIndex(s => s.name === sponsorParam);
+    if(index !== -1) scanStand(index);
+  }
+
+  updateScansDisplay();
+});
 </script>
 
 </body>
