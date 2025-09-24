@@ -10,7 +10,7 @@
   p { color: #555; margin-bottom: 20px; }
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 vakjes naast elkaar */
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     max-width: 520px;
     margin: 0 auto;
@@ -34,17 +34,19 @@
   .stempel { position: absolute; bottom: 5px; right: 5px; font-size: 22px; display: none; }
   .stand.scanned .stempel { display: block; }
   .message { margin-top: 20px; font-size: 18px; color: #555; }
-  .reset-button {
+  .reset-button, .scan-button {
     margin-top: 15px;
     padding: 10px 20px;
-    background: #f44336;
     color: white;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
   }
+  .reset-button { background: #f44336; }
   .reset-button:hover { background: #d32f2f; }
+  .scan-button { background: #2196F3; margin-left: 10px; }
+  .scan-button:hover { background: #1976D2; }
 </style>
 </head>
 <body>
@@ -56,6 +58,7 @@
 
 <div class="message" id="message">Scans: 0 / 24</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
+<button class="scan-button" onclick="scanNewCode()">Scan nog een code</button>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -100,6 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(scannedKey);
       document.querySelectorAll('.stand').forEach(s=>s.classList.remove('scanned'));
       updateScansDisplay();
+    }
+  }
+
+  // Functie voor "Scan nog een code"
+  window.scanNewCode = function(){
+    const num = prompt("Voer het standnummer in dat je wilt scannen (1-24):");
+    const standNum = parseInt(num);
+    if(standNum >= 1 && standNum <= 24){
+      scanStand(standNum);
+      alert(`Stand ${standNum} gescand!`);
+    } else {
+      alert("Ongeldig nummer. Voer een getal tussen 1 en 24 in.");
     }
   }
 
