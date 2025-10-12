@@ -88,7 +88,7 @@
   <div class="header-text">Scan de QR-codes van de sponsoren om je kaart te vullen!</div>
 </div>
   
-<div class="message" id="message">Scans: 0 / 25</div>
+<div class="message" id="message">Scans: 0 / 26</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
 
 <script>
@@ -97,8 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
+  // Special sponsor rechtsboven
+  const specialSponsor = {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"};
+
+  // Alle andere sponsors (25 stuks)
   const sponsors = [
-    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
     {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
     {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
     {name: "BD", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
@@ -121,35 +124,39 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
-    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
+    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"}
   ];
 
+  // Voeg eerst special sponsor toe
+  const specialDiv = document.createElement('div');
+  specialDiv.className = 'stand';
+  specialDiv.id = 'stand-special';
+  specialDiv.innerHTML = `<img src="${specialSponsor.logo}" alt="${specialSponsor.name}"><div class="overlay">✔</div>`;
+  specialDiv.style.gridColumn = '4';
+  specialDiv.style.gridRow = '1';
+  grid.appendChild(specialDiv);
+
+  // Voeg overige sponsors toe
   sponsors.forEach((sponsor, index) => {
     const div = document.createElement('div');
     div.className = 'stand';
     div.id = 'stand' + index;
     div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><div class="overlay">✔</div>`;
-
-    // Coloplast rechtsboven
-    if(index === 0) {
-      div.style.gridColumn = '4';
-      div.style.gridRow = '1';
-    }
-
     grid.appendChild(div);
   });
 
   function updateScansDisplay(){
-    scanned.forEach(index => {
-      const stand = document.getElementById('stand' + index);
+    scanned.forEach(id => {
+      const stand = document.getElementById(id);
       if(stand) stand.classList.add('scanned');
     });
-    document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
+    document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length + 1}`;
   }
 
-  function scanStand(index){
-    if(!scanned.includes(index)){
-      scanned.push(index);
+  function scanStand(id){
+    if(!scanned.includes(id)){
+      scanned.push(id);
       localStorage.setItem(scannedKey, JSON.stringify(scanned));
       updateScansDisplay();
     }
@@ -157,29 +164,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.resetCard = function(){
     if(confirm("Weet je zeker dat je je spaarkaart wilt resetten?")){
-      scanned = [];
-      localStorage.removeItem(scannedKey);
-      document.querySelectorAll('.stand').forEach(s=>s.classList.remove('scanned'));
-      updateScansDisplay();
-    }
-  }
-
-  // Lees parameter sponsor=NaamSponsor
-  const urlParams = new URLSearchParams(window.location.search);
-  const sponsorParam = urlParams.get('sponsor');
-  if(sponsorParam){
-    const index = sponsors.findIndex(s => s.name === sponsorParam);
-    if(index !== -1) scanStand(index);
-  }
-
-  updateScansDisplay();
-});
-</script>
-
-</body>
-</html>
-
-
-
-
-
+      scanned
