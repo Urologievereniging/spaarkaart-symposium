@@ -11,6 +11,7 @@
     margin: 0; 
     padding: 20px; 
     color: white; 
+    text-align: center;
   }
 
   h1 { margin-bottom: 5px; }
@@ -24,14 +25,13 @@
     margin: 0 auto;
     justify-items: center;
     align-items: start;
-    position: relative; /* voor absolute special sponsor */
   }
 
   .stand {
     position: relative;
     width: 100%;
     max-width: 120px;
-    padding-top: 68.75%; /* verhouding 256x176 */
+    padding-top: 68.75%; /* behoud verhouding 256x176 */
     border: 2px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
@@ -66,12 +66,6 @@
     display: flex;
   }
 
-  .stand.special {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-
   .reset-button {
     margin-top: 15px;
     padding: 10px 20px;
@@ -101,9 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-  const specialSponsor = {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"};
-
+  // Alle sponsoren in één array (speciale sponsor eerst)
   const sponsors = [
+    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
     {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
     {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
     {name: "BD", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
@@ -130,28 +124,27 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "NieuweSponsor", logo: "https://via.placeholder.com/256x176?text=NieuweSponsor"}
   ];
 
-  // Voeg special sponsor toe (rechtsboven)
-  const specialDiv = document.createElement('div');
-  specialDiv.className = 'stand special';
-  specialDiv.id = 'stand-special';
-  specialDiv.innerHTML = `<img src="${specialSponsor.logo}" alt="${specialSponsor.name}"><div class="overlay">✔</div>`;
-  grid.appendChild(specialDiv);
-
-  // Voeg overige sponsors toe
   sponsors.forEach((sponsor, index) => {
     const div = document.createElement('div');
     div.className = 'stand';
     div.id = 'stand' + index;
     div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><div class="overlay">✔</div>`;
+    
+    // Coloplast rechtsboven (eerste in array)
+    if(index === 0) {
+      div.style.gridColumn = '4';
+      div.style.gridRow = '1';
+    }
+
     grid.appendChild(div);
   });
 
   function updateScansDisplay(){
     scanned.forEach(index => {
-      const stand = document.getElementById(index === -1 ? 'stand-special' : 'stand' + index);
+      const stand = document.getElementById('stand' + index);
       if(stand) stand.classList.add('scanned');
     });
-    document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length + 1}`;
+    document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
   }
 
   function scanStand(index){
@@ -167,3 +160,21 @@ document.addEventListener('DOMContentLoaded', () => {
       scanned = [];
       localStorage.removeItem(scannedKey);
       document.querySelectorAll('.stand').forEach(s=>s.classList.remove('scanned'));
+      updateScansDisplay();
+    }
+  }
+
+  // Lees parameter sponsor=NaamSponsor
+  const urlParams = new URLSearchParams(window.location.search);
+  const sponsorParam = urlParams.get('sponsor');
+  if(sponsorParam){
+    const index = sponsors.findIndex(s => s.name === sponsorParam);
+    if(index !== -1) scanStand(index);
+  }
+
+  updateScansDisplay();
+});
+</script>
+
+</body>
+</html>
