@@ -17,81 +17,62 @@
     color: white; 
     text-align: center;
   }
+
   h1 { margin-bottom: 5px; }
+
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    max-width: 520px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    max-width: 600px;
     margin: 0 auto;
     justify-items: center;
   }
 
   .stand {
-    perspective: 1000px;
-    width: 100%;
-    max-width: 120px;
-    padding-top: 68.75%;
     position: relative;
-  }
-
-  .card {
-    position: absolute;
     width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-  }
-
-  .stand.scanned .card {
-    transform: rotateY(180deg);
-  }
-
-  .front, .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    backface-visibility: hidden;
-    overflow: hidden;
-  }
-
-  .front {
+    padding-top: 100%;
     background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
   }
 
-  .front img {
+  .stand img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     width: 90%;
     height: auto;
+    transform: translate(-50%, -50%);
     object-fit: contain;
   }
 
-  .back {
+  .stand.scanned {
     background-color: #6b721b;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transform: rotateY(180deg);
   }
 
-  .back i {
+  .stand.scanned img {
+    opacity: 0.1;
+  }
+
+  .stand.scanned::after {
+    content: "\f00c"; /* FontAwesome checkmark */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
     color: white;
-    font-size: 2.8em;
-    animation: popIn 0.5s ease forwards;
+    font-size: 2em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
-  @keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    80% { transform: scale(1.3); opacity: 1; }
-    100% { transform: scale(1); }
-  }
+  .message { margin-top: 12px; font-size: 16px; }
 
   .reset-button {
-    margin-top: 15px;
+    margin-top: 10px;
     padding: 10px 20px;
     background: #6b721b;
     color: white;
@@ -101,7 +82,6 @@
     cursor: pointer;
   }
   .reset-button:hover { background: #556116; }
-  .message { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -112,9 +92,6 @@
 <div class="grid" id="grid"></div>
 <div class="message" id="message">Scans: 0 / 25</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
-
-<!-- Confetti library -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -143,24 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Rembrandt", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Rembrandt.webp"},
     {name: "RMS", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_RMS.webp"},
     {name: "Teleflex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Teleflex_Healt.webp"},
-        {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"},
+    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"},
     {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
-
   ];
 
+  // Logo's in de grid plaatsen
   sponsors.forEach((sponsor, index) => {
     const stand = document.createElement('div');
     stand.className = 'stand';
     stand.id = 'stand' + index;
-    stand.innerHTML = `
-      <div class="card">
-        <div class="front"><img src="${sponsor.logo}" alt="${sponsor.name}"></div>
-        <div class="back"><i class="fa-solid fa-check"></i></div>
-      </div>
-    `;
+    stand.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}">`;
     grid.appendChild(stand);
   });
 
@@ -172,30 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length}`;
   }
 
-  function launchConfetti() {
-    const duration = 2 * 1000;
-    const end = Date.now() + duration;
-
-    (function frame() {
-      confetti({
-        particleCount: 6,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    })();
-  }
-
   function scanStand(index){
     if(!scanned.includes(index)){
       scanned.push(index);
       localStorage.setItem(scannedKey, JSON.stringify(scanned));
       updateScansDisplay();
-
-      // 🎉 test confetti na 2 scans (verander naar 25 voor echte versie)
-      if (scanned.length === 3) {
-        launchConfetti();
-      }
     }
   }
 
@@ -208,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // QR-code scan verwerken
   const urlParams = new URLSearchParams(window.location.search);
   const sponsorParam = urlParams.get('sponsor');
   if(sponsorParam){
@@ -220,4 +174,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
