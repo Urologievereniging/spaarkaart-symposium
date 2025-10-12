@@ -13,32 +13,26 @@
     color: white; 
     text-align: center;
   }
-
   h1 { margin-bottom: 5px; }
-  .header-text { margin-bottom: 20px; }
-
-  .grid-container {
+  .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     max-width: 520px;
     margin: 0 auto;
     justify-items: center;
-    align-items: start;
   }
-
   .stand {
     position: relative;
     width: 100%;
     max-width: 120px;
-    padding-top: 68.75%; /* behoud verhouding 256x176 */
+    padding-top: 68.75%; /* logo ratio 256x176 */
     border: 2px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
     overflow: hidden;
     background-color: white;
   }
-
   .stand img {
     position: absolute;
     top: 50%;
@@ -48,7 +42,6 @@
     height: auto;
     object-fit: contain;
   }
-
   .overlay {
     position: absolute;
     top: 0; left: 0;
@@ -61,11 +54,7 @@
     color: white;
     display: none;
   }
-
-  .stand.scanned .overlay {
-    display: flex;
-  }
-
+  .stand.scanned .overlay { display: flex; }
   .reset-button {
     margin-top: 15px;
     padding: 10px 20px;
@@ -83,10 +72,10 @@
 <body>
 
 <h1>Urologie Symposium Spaarkaart</h1>
-<div class="header-text">Scan de QR-codes van de sponsoren om je kaart te vullen!</div>
+<p>Scan de QR-codes van de sponsoren om je kaart te vullen!</p>
 
-<div class="grid-container" id="grid"></div>
-<div class="message" id="message">Scans: 0 / 26</div>
+<div class="grid" id="grid"></div>
+<div class="message" id="message">Scans: 0 / 25</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
 
 <script>
@@ -95,13 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-  // Alle sponsoren in één array (speciale sponsor eerst)
   const sponsors = [
-    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
     {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
     {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
     {name: "BD", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
     {name: "Bosman MediReva", logo: "https://urologiescholing.nl/wp-content/uploads/2025/03/Logo_sponsor_Bosman_MediReva.webp"},
+    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
     {name: "Dudok Surgical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Dudok.webp"},
     {name: "Goodlife", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Goodlife.webp"},
     {name: "Hollister", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hollister.webp"},
@@ -121,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
-    {name: "NieuweSponsor", logo: "https://via.placeholder.com/256x176?text=NieuweSponsor"}
+    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast.webp"} // nieuwe, 25e sponsor
   ];
 
   sponsors.forEach((sponsor, index) => {
@@ -129,13 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
     div.className = 'stand';
     div.id = 'stand' + index;
     div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><div class="overlay">✔</div>`;
-    
-    // Coloplast rechtsboven (eerste in array)
-    if(index === 0) {
-      div.style.gridColumn = '4';
-      div.style.gridRow = '1';
-    }
-
     grid.appendChild(div);
   });
 
