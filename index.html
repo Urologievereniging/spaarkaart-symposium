@@ -7,21 +7,27 @@
 <style>
   body { 
     font-family: Arial, sans-serif; 
-    background-color: #afb81a; /* pagina achtergrond */ 
+    background-color: #afb81a; 
     margin: 0; 
     padding: 20px; 
-    text-align: center; 
     color: white; 
   }
-  h1 { color: white; margin-bottom: 5px; }
-  p { color: white; margin-bottom: 20px; }
-  .grid {
+  .grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     max-width: 520px;
     margin: 0 auto;
     justify-items: center;
+    align-items: start;
+  }
+  .header-text {
+    grid-column: 1 / 4; /* kolom 1 t/m 3 */
+    font-size: 1em;
+    color: white;
+    margin-bottom: 0;
+    padding-top: 10px;
+    text-align: left;
   }
   .stand {
     position: relative;
@@ -32,7 +38,7 @@
     border-radius: 8px;
     box-sizing: border-box;
     overflow: hidden;
-    background-color: white; /* vakjes achtergrond wit */
+    background-color: white;
   }
   .stand img {
     position: absolute;
@@ -47,7 +53,7 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(175, 184, 26, 0.4); /* lichte transparante groene overlay */
+    background: rgba(175, 184, 26, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,7 +67,7 @@
   .reset-button {
     margin-top: 15px;
     padding: 10px 20px;
-    background: #6b721b; /* nieuwe knopkleur */
+    background: #6b721b;
     color: white;
     border: none;
     border-radius: 8px;
@@ -69,15 +75,18 @@
     cursor: pointer;
   }
   .reset-button:hover { background: #556116; }
+  .message {
+    margin-top: 10px;
+  }
 </style>
 </head>
 <body>
 
-<h1>Urologie Symposium Spaarkaart</h1>
-<p>Scan de QR-codes van de sponsoren om je kaart te vullen!</p>
+<div class="grid-container" id="grid">
+  <div class="header-text">Scan de QR-codes van de sponsoren om je kaart te vullen!</div>
+</div>
 
-<div class="grid" id="grid"></div>
-<div class="message" id="message">Scans: 0 / 24</div>
+<div class="message" id="message">Scans: 0 / 25</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
 
 <script>
@@ -86,13 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-  // Voorbeeld eerste twee sponsoren, vul aan met overige 24 later
   const sponsors = [
+    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
     {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
     {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
     {name: "BD", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Bard.webp"},
     {name: "Bosman MediReva", logo: "https://urologiescholing.nl/wp-content/uploads/2025/03/Logo_sponsor_Bosman_MediReva.webp"},
-    {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"},
     {name: "Dudok Surgical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Dudok.webp"},
     {name: "Goodlife", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Goodlife.webp"},
     {name: "Hollister", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Hollister.webp"},
@@ -111,19 +119,21 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
-    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
-
-    
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
   ];
 
   sponsors.forEach((sponsor, index) => {
     const div = document.createElement('div');
     div.className = 'stand';
     div.id = 'stand' + index;
-    div.innerHTML = `
-      <img src="${sponsor.logo}" alt="${sponsor.name}">
-      <div class="overlay">✔</div>
-    `;
+    div.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}"><div class="overlay">✔</div>`;
+
+    // Coloplast rechtsboven
+    if(index === 0) {
+      div.style.gridColumn = '4';
+      div.style.gridRow = '1';
+    }
+
     grid.appendChild(div);
   });
 
@@ -166,4 +176,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
