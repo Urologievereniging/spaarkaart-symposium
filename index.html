@@ -17,48 +17,43 @@
     color: white; 
     text-align: center;
   }
-
   h1 { margin-bottom: 5px; }
-
   .grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    max-width: 600px;
+    grid-template-columns: repeat(5, 1fr); /* 5x5 grid */
+    gap: 5px;
+    max-width: 520px;
     margin: 0 auto;
     justify-items: center;
   }
-
   .stand {
     position: relative;
     width: 100%;
-    padding-top: 100%;
-    background-color: white;
-    border-radius: 10px;
+    max-width: 100px;
+    padding-top: 68.75%; /* verhouding logo */
+    border-radius: 8px;
     overflow: hidden;
-    transition: background-color 0.3s ease;
+    background-color: white;
   }
-
   .stand img {
     position: absolute;
     top: 50%;
     left: 50%;
+    transform: translate(-50%, -50%);
     width: 90%;
     height: auto;
-    transform: translate(-50%, -50%);
     object-fit: contain;
   }
 
+  /* Gescand vakje */
   .stand.scanned {
-    background-color: #6b721b;
+    background-color: #6b721b; /* volledig groen */
   }
-
   .stand.scanned img {
-    opacity: 0.5;
+    display: none; /* logo weg */
   }
-
   .stand.scanned::after {
-    content: "\f00c"; /* FontAwesome checkmark */
+    content: "\f00c"; /* FontAwesome check */
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     color: white;
@@ -69,10 +64,8 @@
     transform: translate(-50%, -50%);
   }
 
-  .message { margin-top: 12px; font-size: 16px; }
-
   .reset-button {
-    margin-top: 10px;
+    margin-top: 15px;
     padding: 10px 20px;
     background: #6b721b;
     color: white;
@@ -82,6 +75,7 @@
     cursor: pointer;
   }
   .reset-button:hover { background: #556116; }
+  .message { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -127,12 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
   ];
 
-  // Logo's in de grid plaatsen
   sponsors.forEach((sponsor, index) => {
     const stand = document.createElement('div');
     stand.className = 'stand';
     stand.id = 'stand' + index;
     stand.innerHTML = `<img src="${sponsor.logo}" alt="${sponsor.name}">`;
+    stand.addEventListener('click', () => scanStand(index));
     grid.appendChild(stand);
   });
 
@@ -161,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // QR-code scan verwerken
   const urlParams = new URLSearchParams(window.location.search);
   const sponsorParam = urlParams.get('sponsor');
   if(sponsorParam){
@@ -174,4 +167,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
