@@ -17,21 +17,22 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 5px;
     max-width: 520px;
     margin: 0 auto;
     justify-items: center;
   }
   .stand {
-    position: relative;
-    width: 100%;
-    max-width: 120px;
-    padding-top: 68.75%; /* logo ratio 256x176 */
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-    overflow: hidden;
-    background-color: white;
+  position: relative;
+  width: 100%;
+  max-width: 120px;
+  padding-top: 68.75%; /* logo ratio 256x176 */
+  border-radius: 8px; /* afgeronde hoeken behouden */
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: white; /* achtergrond wit */
+  /* border verwijderd */
+    
   }
   .stand img {
     position: absolute;
@@ -159,3 +160,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
