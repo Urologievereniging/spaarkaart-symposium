@@ -16,6 +16,8 @@
     padding: 20px; 
     color: white; 
     text-align: center;
+    position: relative;
+    overflow-x: hidden;
   }
   h1 { margin-bottom: 5px; }
   .grid {
@@ -28,7 +30,6 @@
   }
 
   .stand {
-    perspective: 1000px;
     width: 100%;
     max-width: 120px;
     padding-top: 68.75%;
@@ -40,12 +41,6 @@
     width: 100%;
     height: 100%;
     border-radius: 8px;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-  }
-
-  .stand.scanned .card {
-    transform: rotateY(180deg);
   }
 
   .front, .back {
@@ -53,15 +48,14 @@
     width: 100%;
     height: 100%;
     border-radius: 8px;
-    backface-visibility: hidden;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .front {
     background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .front img {
@@ -72,10 +66,6 @@
 
   .back {
     background-color: #6b721b;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transform: rotateY(180deg);
   }
 
   .back i {
@@ -102,7 +92,32 @@
   }
   .reset-button:hover { background: #556116; }
   .message { margin-top: 10px; }
+
+  /* Felicitatie overlay */
+  #congrats {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: #fff100;
+    color: #6b721b;
+    font-size: 2em;
+    font-weight: bold;
+    padding: 20px 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    z-index: 9999;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    opacity: 0;
+  }
+
+  #congrats.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
 </style>
+
 </head>
 <body>
 
@@ -112,6 +127,9 @@
 <div class="grid" id="grid"></div>
 <div class="message" id="message">Scans: 0 / 25</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
+
+<!-- Felicitatie overlay -->
+<div id="congrats">🎉 Gefeliciteerd! 🎉</div>
 
 <!-- Confetti library -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
@@ -143,12 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Rembrandt", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Rembrandt.webp"},
     {name: "RMS", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_RMS.webp"},
     {name: "Teleflex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Teleflex_Healt.webp"},
-        {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"},
+    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"},
     {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
-
   ];
 
   sponsors.forEach((sponsor, index) => {
@@ -175,7 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function launchConfetti() {
     const duration = 2 * 1000;
     const end = Date.now() + duration;
-
     (function frame() {
       confetti({
         particleCount: 6,
@@ -186,15 +202,22 @@ document.addEventListener('DOMContentLoaded', () => {
     })();
   }
 
+  function showCongrats() {
+    const congrats = document.getElementById('congrats');
+    congrats.classList.add('show');
+    setTimeout(() => congrats.classList.remove('show'), 3000); // verdwijnt na 3 sec
+  }
+
   function scanStand(index){
     if(!scanned.includes(index)){
       scanned.push(index);
       localStorage.setItem(scannedKey, JSON.stringify(scanned));
       updateScansDisplay();
 
-      // 🎉 test confetti na 2 scans (verander naar 25 voor echte versie)
+      // 🎉 confetti + felicitatie na 3 scans (test)
       if (scanned.length === 3) {
         launchConfetti();
+        showCongrats();
       }
     }
   }
@@ -220,5 +243,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
