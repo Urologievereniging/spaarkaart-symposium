@@ -12,6 +12,10 @@
     padding: 20px; 
     color: white; 
   }
+
+  h1 { margin-bottom: 5px; }
+  .header-text { margin-bottom: 20px; }
+
   .grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -20,26 +24,21 @@
     margin: 0 auto;
     justify-items: center;
     align-items: start;
+    position: relative; /* voor absolute special sponsor */
   }
-  .header-text {
-    grid-column: 1 / 4; /* kolom 1 t/m 3 */
-    font-size: 1em;
-    color: white;
-    margin-bottom: 0;
-    padding-top: 10px;
-    text-align: left;
-  }
+
   .stand {
     position: relative;
     width: 100%;
     max-width: 120px;
-    padding-top: 68.75%; /* behoud logo ratio 256x176 → 16:11 */
+    padding-top: 68.75%; /* verhouding 256x176 */
     border: 2px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
     overflow: hidden;
     background-color: white;
   }
+
   .stand img {
     position: absolute;
     top: 50%;
@@ -49,6 +48,7 @@
     height: auto;
     object-fit: contain;
   }
+
   .overlay {
     position: absolute;
     top: 0; left: 0;
@@ -61,9 +61,17 @@
     color: white;
     display: none;
   }
+
   .stand.scanned .overlay {
     display: flex;
   }
+
+  .stand.special {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
   .reset-button {
     margin-top: 15px;
     padding: 10px 20px;
@@ -75,19 +83,15 @@
     cursor: pointer;
   }
   .reset-button:hover { background: #556116; }
-  .message {
-    margin-top: 10px;
-  }
+  .message { margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <h1>Urologie Symposium Spaarkaart</h1>
+<div class="header-text">Scan de QR-codes van de sponsoren om je kaart te vullen!</div>
 
-<div class="grid-container" id="grid">
-  <div class="header-text">Scan de QR-codes van de sponsoren om je kaart te vullen!</div>
-</div>
-  
+<div class="grid-container" id="grid"></div>
 <div class="message" id="message">Scans: 0 / 26</div>
 <button class="reset-button" onclick="resetCard()">Reset kaart</button>
 
@@ -97,10 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const scannedKey = "spaarkaartScans";
   let scanned = JSON.parse(localStorage.getItem(scannedKey)) || [];
 
-  // Special sponsor rechtsboven
   const specialSponsor = {name: "Coloplast", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Coloplast_Eretitel.webp"};
 
-  // Alle andere sponsors (25 stuks)
   const sponsors = [
     {name: "Abena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Abena.webp"},
     {name: "Alnylam", logo: "https://urologiescholing.nl/wp-content/uploads/2025/06/Logo_sponsor_Alnylam.webp"},
@@ -125,16 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
-    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"}
+    {name: "NieuweSponsor", logo: "https://via.placeholder.com/256x176?text=NieuweSponsor"}
   ];
 
-  // Voeg eerst special sponsor toe
+  // Voeg special sponsor toe (rechtsboven)
   const specialDiv = document.createElement('div');
-  specialDiv.className = 'stand';
+  specialDiv.className = 'stand special';
   specialDiv.id = 'stand-special';
   specialDiv.innerHTML = `<img src="${specialSponsor.logo}" alt="${specialSponsor.name}"><div class="overlay">✔</div>`;
-  specialDiv.style.gridColumn = '4';
-  specialDiv.style.gridRow = '1';
   grid.appendChild(specialDiv);
 
   // Voeg overige sponsors toe
@@ -147,16 +147,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function updateScansDisplay(){
-    scanned.forEach(id => {
-      const stand = document.getElementById(id);
+    scanned.forEach(index => {
+      const stand = document.getElementById(index === -1 ? 'stand-special' : 'stand' + index);
       if(stand) stand.classList.add('scanned');
     });
     document.getElementById('message').innerText = `Scans: ${scanned.length} / ${sponsors.length + 1}`;
   }
 
-  function scanStand(id){
-    if(!scanned.includes(id)){
-      scanned.push(id);
+  function scanStand(index){
+    if(!scanned.includes(index)){
+      scanned.push(index);
       localStorage.setItem(scannedKey, JSON.stringify(scanned));
       updateScansDisplay();
     }
@@ -164,4 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.resetCard = function(){
     if(confirm("Weet je zeker dat je je spaarkaart wilt resetten?")){
-      scanned
+      scanned = [];
+      localStorage.removeItem(scannedKey);
+      document.querySelectorAll('.stand').forEach(s=>s.classList.remove('scanned'));
