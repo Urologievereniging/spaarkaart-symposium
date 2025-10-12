@@ -14,10 +14,11 @@
     text-align: center;
   }
   h1 { margin-bottom: 5px; }
+  p { margin-top: 0; margin-bottom: 15px; }
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(5, 1fr); /* 5 kolommen */
+    gap: 5px; /* kleinere spatiëring */
     max-width: 520px;
     margin: 0 auto;
     justify-items: center;
@@ -25,20 +26,20 @@
   .stand {
     position: relative;
     width: 100%;
-    max-width: 120px;
-    padding-top: 68.75%; /* logo ratio 256x176 */
-    border: 2px solid #ccc;
-    border-radius: 8px;
+    max-width: 90px; /* kleiner zodat 5 naast elkaar past */
+    padding-top: 68.75%; /* behoud logo ratio 256x176 */
+    border: none; /* geen omlijning */
+    border-radius: 0;
     box-sizing: border-box;
     overflow: hidden;
-    background-color: white;
+    background-color: transparent; /* transparant, geen achtergrond */
   }
   .stand img {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
+    width: 100%;
     height: auto;
     object-fit: contain;
   }
@@ -109,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
-    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"} // nieuwe, 25e sponsor
+    {name: "TSC Life", logo: "https://urologiescholing.nl/wp-content/uploads/2025/10/Logo_sponsor_TSCLife.webp"} // 25e
   ];
 
   sponsors.forEach((sponsor, index) => {
@@ -145,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Lees parameter sponsor=NaamSponsor
   const urlParams = new URLSearchParams(window.location.search);
   const sponsorParam = urlParams.get('sponsor');
   if(sponsorParam){
@@ -159,4 +159,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
