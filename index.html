@@ -22,29 +22,29 @@ h1 {
   margin-bottom: 5px; 
   font-size: 1.4em;  /* iets kleiner zodat het minder ruimte inneemt */
 }
-
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr); /* 4 kolommen */
-  gap: 4px; /* ruimte tussen de logo's, kan kleiner/groter */
+  gap: 5px;
+  max-width: 100%; /* volledige breedte van het scherm */
 }
-  .stand {
-  position: relative;
-  width: 100%;          /* neemt 100% van de kolombreedte */
-  padding-top: 100%;    /* maakt het vierkant (hoogte = breedte) */
+
+.stand {
+  width: 100%;           /* vult 1 kolom */
   border-radius: 8px;
   overflow: hidden;
   background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-  .stand img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    height: auto;
-    object-fit: contain;
-  }
+
+.stand img {
+  width: 90%;           /* vult bijna het vak, horizontaal */
+  height: auto;         /* behoudt eigen verhouding */
+  object-fit: contain;
+  display: block;
+}
 
   /* Gescand vakje */
   .stand.scanned {
@@ -179,5 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
