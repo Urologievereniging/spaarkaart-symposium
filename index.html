@@ -23,23 +23,19 @@ h1 {
   font-size: 1.4em;  /* iets kleiner zodat het minder ruimte inneemt */
 }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5x5 grid */
-    gap: 5px;
-    max-width: 520px;
-    margin: 0 auto;
-    justify-items: center;
-  }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 kolommen */
+  gap: 4px; /* ruimte tussen de logo's, kan kleiner/groter */
+}
   .stand {
-    position: relative;
-    width: 100%;
-    max-width: 100px;
-    padding-top: 68.75%; /* verhouding logo */
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: white;
-  }
+  position: relative;
+  width: 100%;          /* neemt 100% van de kolombreedte */
+  padding-top: 100%;    /* maakt het vierkant (hoogte = breedte) */
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+}
   .stand img {
     position: absolute;
     top: 50%;
@@ -81,6 +77,14 @@ h1 {
   }
   .reset-button:hover { background: #556116; }
   .message { margin-top: 10px; }
+
+ /* 👇 Voeg dit helemaal onderaan toe */
+@media (max-width: 600px) {
+  .stand {
+    max-width: 100px; /* automatisch iets kleiner op mobiele schermen */
+  }
+}
+
 </style>
 </head>
 <body>
@@ -123,6 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
     {name: "Tena", logo: "https://urologiescholing.nl/wp-content/uploads/2024/10/Logo_sponsor_Tena.webp"},
     {name: "Urotex", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Urotexmedical.webp"},
     {name: "Van Heek Medical", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Vanheekmedical.webp"},
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
+    {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"},
     {name: "Wellspect", logo: "https://urologiescholing.nl/wp-content/uploads/2024/09/Logo_sponsor_Wellspect.webp"}
   ];
 
@@ -172,4 +179,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
